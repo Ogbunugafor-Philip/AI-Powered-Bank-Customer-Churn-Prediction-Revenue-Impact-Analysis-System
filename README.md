@@ -229,11 +229,14 @@ In this phase, we transform raw customer data into actionable machine learning o
 The output of this phase is a churn score (0.00 – 1.00) that quantifies the likelihood that each customer will leave. These predictions are then stored back into the bank’s SQLite analytics database to support later revenue risk assessment and precision retention strategies.
 This phase builds the core intelligence behind the entire churn prevention system, helping the bank protect customer lifetime value, reduce churn rate, and grow profitability through data-driven decision-making.
 
-Step 1 — Engineer a churn label (create target column)
+#### Step 1 — Engineer a churn label (create target column)
+
 Business rules to identify churners (e.g., last_txn_days_ago > threshold) and generate new column: churn_label (0 = active, 1 = churned)
 
 •	Create a folder named src then create a file named 01_engineer_churn_label.py in it
+
 •	Paste the below in the just created file
+```
 import sqlite3
 import pandas as pd
 
@@ -253,19 +256,29 @@ print("✅ churn_label created and saved to bank_customers table.")
 print(df[["customer_id", "last_txn_days_ago", "churn_label"]].head())
 
 conn.close()
+```
 
 •	In terminal, run the below to check that we are good
+```
 cd src
 python3 01_engineer_churn_label.py
- 
+``` 
+<img width="850" height="250" alt="image" src="https://github.com/user-attachments/assets/60497cc0-728d-44de-bffb-f81c45ad800c" />
 
 
-Step 2 — Select features & preprocess
+#### Step 2 — Select features & preprocess
+
 Drop irrelevant columns (customer_id, join_date…), handle missing values, encode categorical features and scale or normalize numeric features if needed
+
 •	Install scikit learn, run;
+```
 pip install scikit-learn
- 
+```
+ <img width="975" height="318" alt="image" src="https://github.com/user-attachments/assets/41a11bac-8da9-49a3-af67-80ddf271874a" />
+
+
 •	In the src folder, create a file named 02_preprocess_features.py and paste the below in it
+```
 import os
 import sqlite3
 import pandas as pd
@@ -419,16 +432,23 @@ joblib.dump(
 )
 
 print("🎉 Step 2 completed successfully: features selected & preprocessed.")
+```
 
 •	In terminal, run the below to check that we are good
+```
 cd src
 python3 02_preprocess_features.py
+```
+<img width="975" height="529" alt="image" src="https://github.com/user-attachments/assets/5eaa29e3-4cc5-41b2-9d4a-79d0b31a4495" />
 
  
 
-Step 3 — Train ML classification models
+#### Step 3 — Train ML classification models
+
 We would create our baseline Model: Logistic Regression, improved Models: Random Forest and compare performance results
+
 •	In the src folder, create a file named 03_train_models.py and paste the below in it
+```
 import os
 import joblib
 import sqlite3
@@ -566,16 +586,21 @@ conn.close()
 
 print("\n🎯 Step 3 completed successfully!")
 print("➡️ Next: Predict churn probabilities & populate database (Step 4)")
+```
 
 •	In terminal, run the below to check that we are good
+```
 cd src
 python3 03_train_models.py
-
+```
+<img width="975" height="560" alt="image" src="https://github.com/user-attachments/assets/1e051735-5af7-49d2-8de5-251bfb4638fa" />
  
 
-Step 4 — Produce churn probability scores
+#### Step 4 — Produce churn probability scores
 We now predict probability for every customer and add new column: churn_probability
+
 •	In the src folder, create a file named 04_predict_and_store.py and paste the below in it
+```
 import sqlite3
 import pandas as pd
 import numpy as np
@@ -656,22 +681,29 @@ conn.close()
 
 print("\n🎉 Step 4 complete: churn probabilities stored & actionable!")
 print("➡️ Proceed to Step 5: Revenue Impact Insights & Retention Strategy")
-
+```
 
 •	Run the below command
+```
 Python3 04_predict_and_store.py
- 
+``` 
+<img width="975" height="479" alt="image" src="https://github.com/user-attachments/assets/3d806ea5-073a-44aa-b2cf-45e3ec1a38ad" />
 
-Phase 3 — Model Evaluation & Explainability
+### Phase 3 — Model Evaluation & Explainability
 After training the churn prediction model, it is critical not only to measure how accurately it predicts customer churn, but also to understand why those predictions are made. In real banking environments, model transparency is essential because management must be confident that recommendations are based on valid customer behavior and financial insights.
 This phase focuses on evaluating the model’s performance using industry-standard metrics and then revealing the key churn drivers behind the predictions. To achieve this, the following analyses will be conducted:
-•	ROC-AUC Curve: Measures the model’s ability to distinguish churn-risk customers from loyal customers across all risk thresholds.
-•	Feature Importance Analysis: Shows which customer behaviors and attributes have the strongest influence on churn outcomes.
-•	SHAP Explainability: Provides customer-level interpretation, explaining exactly why the model labeled each customer as high- or low-risk.
+   - ROC-AUC Curve: Measures the model’s ability to distinguish churn-risk customers from loyal customers across all risk thresholds.
+   - Feature Importance Analysis: Shows which customer behaviors and attributes have the strongest influence on churn outcomes.
+   - SHAP Explainability: Provides customer-level interpretation, explaining exactly why the model labeled each customer as high- or low-risk.
+
 By combining performance evaluation with explainability, this phase ensures that the AI system is both accurate and trustworthy, empowering bank teams to confidently take targeted retention actions that protect revenue and enhance customer lifetime value.
-Step 1 — Load Best Model and Test Data
+
+
+#### Step 1 — Load Best Model and Test Data
 In this step, we retrieve the trained best model and the processed test dataset so that we can evaluate how well the model performs on unseen customer records.
+
 •	In the evaluation folder, create a file named eval_01_load_artifacts.py and paste the below in it
+```
 # Step 1 — Load Best Model and Test Data
 
 import os
@@ -695,14 +727,21 @@ y_test = data["y_test"]
 
 print("🔍 Data loaded successfully!")
 print(f"Test set size: {X_test.shape[0]} customers")
+```
 
 •	Run the script;
+```
 python3 eval_01_load_artifacts.py
+```
+<img width="950" height="209" alt="image" src="https://github.com/user-attachments/assets/5212ff15-0211-4ff1-afef-44663a360e9f" />
  
 
-Step 2 — Performance Evaluation Metrics
+#### Step 2 — Performance Evaluation Metrics
+
 In this step, we evaluate how well the churn prediction model performs on unseen test data. We compute key classification metrics including Accuracy, Precision, Recall, F1 score, and ROC-AUC to ensure the model predictions are reliable for business decision-making.
+
 •	In the evaluation folder, create a file named eval_02_classification_metrics.py and paste the below in it
+```
 # Step 2 — Performance Evaluation Metrics
 
 import os
@@ -744,19 +783,28 @@ print(f"✔ ROC-AUC: {roc_auc:.4f}")
 
 print("\n📌 Classification Report:")
 print(classification_report(y_test, y_pred))
+```
 
 •	Run the script;
+```
 python3 eval_02_classification_metrics.py
- 
+``` 
+<img width="964" height="330" alt="image" src="https://github.com/user-attachments/assets/8b964cf3-9472-43dc-9a59-a25f5696f314" />
 
 
-Step 3 — ROC Curve & Confusion Matrix Visuals
+#### Step 3 — ROC Curve & Confusion Matrix Visuals
 In this step, we visualize the model’s performance using ROC-AUC and Confusion Matrix charts. These enable stakeholders to quickly assess model reliability and detect any misclassification pattern.
+
 •	Install Seaborn, run;
+```
 pip install seaborn
- 
+```
+<img width="975" height="340" alt="image" src="https://github.com/user-attachments/assets/55e5c2af-8762-4f00-9fea-24ec868709d4" />
+
+
 
 •	In the evaluation folder, create a file named eval_03_roc_confusion_matrix.py and paste the below in it
+```
 import os
 import joblib
 import matplotlib.pyplot as plt
@@ -813,15 +861,20 @@ plt.close()
 print(f"✔ Confusion Matrix saved: {conf_matrix_path}")
 
 print("\n🎯 Step 3 completed successfully! Charts saved to evaluation_results folder.")
+```
 
 •	Run the script;
+```
 python3 eval_03_roc_confusion_matrix.py
- 
+``` 
+<img width="975" height="305" alt="image" src="https://github.com/user-attachments/assets/980b5ed0-cf03-467a-ac8f-40f13055b20f" />
 
-Step 4 — Feature Importance Analysis
+
+### Step 4 — Feature Importance Analysis
 This step identifies the behavioral and financial factors that most strongly influence a customer's likelihood to churn. These insights allow the bank to target retention actions where they matter most — for example, improving engagement or addressing complaints before the customer leaves.
 
 •	In the evaluation folder, create a file named eval_04_feature_importance.py and paste the below in it
+```
 # Step 4 — Feature Importance Analysis (Corrected with Encoded Feature Names)
 
 import os
@@ -880,16 +933,21 @@ plt.close()
 
 print(f"\n✔ Feature Importance chart saved: {plot_path}")
 print("🎯 Step 4 Completed Successfully!")
+```
 
 •	Run the script;
+```
 python3 eval_04_feature_importance.py
- 
+``` 
+<img width="975" height="529" alt="image" src="https://github.com/user-attachments/assets/d5579ae6-4be0-4e1b-8e9c-c019d229c77f" />
 
 
 
-Step 5 — SHAP Explainability
+#### Step 5 — SHAP Explainability
 In this final step of model evaluation, we use SHAP explainability to reveal how each feature contributes to the model’s churn risk predictions, ensuring full transparency and interpretability for stakeholders and banking regulators.
+
 •	In the evaluation folder, create a file named eval_05_shap_explainability.py and paste the below in it
+```
 # Step 5 — SHAP Explainability (Bulletproof Version)
 
 import os
@@ -957,26 +1015,38 @@ plt.close()
 
 print(f"✔ SHAP Summary saved: {summary_path}")
 print("🎯 Phase 3 Completed Successfully!")
+```
 
 •	Run the script;
+```
 python3 eval_05_shap_explainability.py
- 
+``` 
+<img width="975" height="224" alt="image" src="https://github.com/user-attachments/assets/605e33ca-03cb-40e8-9ab5-503ee216586c" />
 
 
 
 Phase 4 — Revenue Impact Analysis
 While predicting customer churn provides the early warning signal, true business value is realized when those predictions are translated into financial impact and actionable retention strategy. Phase 4 focuses on quantifying the monetary risk associated with customer churn and highlighting high-value customers who require urgent intervention.
 By combining churn probability scores with estimated Customer Lifetime Value (CLV), current balances, and salary inflow strength, we can accurately estimate the revenue at risk if a customer decides to leave. This enables bank leadership to prioritize retention activities where they will yield the highest return on investment.
+
 This phase delivers clear and actionable insights such as:
+
 i.	How much revenue is at risk in the customer portfolio
+
 ii.	Which high-value customers are most likely to churn
+
 iii.	The percentage of customers driving the majority of churn exposure
+
 iv.	Data-driven recommendations for targeted retention strategies
+
 Ultimately, Phase 4 transforms churn modeling from a technical exercise into a strategic business decision engine that directly protects profitability and strengthens long-term customer loyalty.
 
-Step 1: Revenue Risk Calculation
+#### Step 1: Revenue Risk Calculation
+
 We convert churn probability into estimated revenue loss by combining churn score with the financial value associated with each customer. This produces a new metric — Revenue at Risk — which quantifies how much money the bank may lose if that customer churns.
+
 •	In the revenue_analysis folder, create a file named step_01_revenue_risk.py and paste the below in it
+```
 # Phase 4 — Step 4.1: Revenue Risk Calculation
 
 import sqlite3
@@ -1013,21 +1083,24 @@ print(df_sorted.head(10))
 
 print("\n✔ Revenue Risk calculated and stored in revenue_insights table!")
 print("➡️ Proceed to: Step 4.2 — VIP Churner Prioritization")
-
-
-
+```
 
 
 
 
 
 •	Run the script;
+```
 python3 step_01_revenue_risk.py
- 
+``` 
+<img width="975" height="377" alt="image" src="https://github.com/user-attachments/assets/0a469d84-64c3-4eb5-a96d-ae73973ffef5" />
 
-Step 2: High-Value Churner Prioritization
+
+#### Step 2: High-Value Churner Prioritization
 In this step, we identify the segment of customers who simultaneously have high churn risk and high revenue value. These are the customers where targeted retention has the greatest financial impact.
+
 •	In the revenue_analysis folder, create a file named step_02_vip_prioritization.py and paste the below in it
+```
 # Phase 4 — Step 4.2: High-Value Churner Prioritization
 
 import sqlite3
@@ -1060,14 +1133,21 @@ print(df["retention_priority"].value_counts())
 
 print("\n✔ VIP Churn Prioritization Complete!")
 print("➡️ Proceed to Step 4.3 — Portfolio Risk Distribution")
+```
 
 •	Run the script;
+```
 python3 step_02_vip_prioritization.py
- 
+```
+<img width="975" height="355" alt="image" src="https://github.com/user-attachments/assets/7f9d8648-04bd-476e-90a1-c84813937a0a" />
 
-Step 3: Portfolio Risk Distribution
+
+#### Step 3: Portfolio Risk Distribution
+
 This step reveals how revenue risk is concentrated across customer segments. We quantify what percentage of customers generate the majority of churn exposure — allowing the bank to focus resources efficiently.
+
 •	In the revenue_analysis folder, create a file named step_03_portfolio_distribution.py and paste the below in it
+```
 # Phase 4 — Step 4.3: Portfolio Risk Distribution
 
 import sqlite3
@@ -1100,14 +1180,21 @@ conn.close()
 
 print("\n✔ Portfolio Risk Distribution Report Generated!")
 print("➡️ Proceed to Step 4.4 — Business Recommendations")
+```
 
 •	Run the script;
+```
 python3 step_03_portfolio_distribution.py
- 
+```
+<img width="975" height="526" alt="image" src="https://github.com/user-attachments/assets/e63d7041-0534-4370-a195-73bb490504be" />
 
-Step 4: Business Recommendations
+
+
+#### Step 4: Business Recommendations
 Based on churn drivers and financial exposure, we recommend proactive interventions focused on high-value customers, preventing churn before it occurs. Each recommendation is aligned with key churn reasons uncovered by the model.
+
 •	In the revenue_analysis folder, create a file named step_04_recommendations.py and paste the below in it
+```
 # Phase 4 — Step 4.4: Business Recommendations
 
 import sqlite3
@@ -1146,42 +1233,57 @@ conn.close()
 
 print("\n✔ Business Recommendations Table Saved!")
 print("➡️ PHASE 4 COMPLETED! 🎉")
+```
 
 •	Run the script;
+```
 python3 step_04_recommendations.py
- 
+``` 
+<img width="975" height="482" alt="image" src="https://github.com/user-attachments/assets/d825fce3-a969-4889-bd20-57de0af8c9f7" />
 
 
 
 
 
 
-Step 5 — Dashboard & Deployment Concept
+### Step 5 — Dashboard & Deployment Concept
 In a real banking environment, artificial intelligence becomes truly valuable only when insights are delivered in a format that business leaders can understand and act upon immediately. After developing the churn prediction model and performing revenue impact analysis, the next crucial step is to operationalize these results in a centralized decision-support platform.
 Phase 5 focuses on deploying an interactive AI-powered Churn & Revenue Risk Dashboard, designed specifically for Customer Retention Teams, Relationship Managers, and Senior Executives. This dashboard visualizes real-time churn probability, revenue exposure distribution, high-value customer risks, and recommended retention strategies generated by the AI model.
 With streamlined filters, executive KPIs, VIP churn watchlists, and targeted outreach recommendations, the dashboard transforms complex analytics into clear, actionable intelligence. This enables the bank to act proactively—prioritizing the customers who matter most, reducing preventable churn, protecting Customer Lifetime Value, and enabling smarter resource allocation.
 Ultimately, Phase 5 ensures that the advanced analytics built in earlier phases are not left on a data scientist’s laptop, but instead delivered as a live operational tool capable of supporting business decisions every single day.
+
 •	Run these commands
+```
 cd /root/projects/bank_churn/src
 mkdir -p dashboard
 cd dashboard
 touch app.py
+```
 
 •	Paste the below code in the just created app.py file
+```
 Code on app.py
+```
 
 •	Run the command;
+```
 streamlit run app.py --server.port 8505 --server.address 0.0.0.0
 http://localhost:8505/
- 
+``` 
+<img width="975" height="439" alt="image" src="https://github.com/user-attachments/assets/40b412c5-d3f0-442b-8d23-eb6ace8c3ac8" />
 
 
 
 
-Now, let us enable Streamlit Dashboard to Auto-Run Using systemd
+#### Now, let us enable Streamlit Dashboard to Auto-Run Using systemd
+
 •	Create a systemd service file. Run;
+```
 sudo vi /etc/systemd/system/churn_dashboard.service
+```
+
 •	Paste this EXACT configuration (update the USER + paths to match your actual environment)
+```
 [Unit]
 Description=Bank Churn Prediction Dashboard (Streamlit)
 After=network.target
@@ -1196,13 +1298,20 @@ Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
+```
+
 •	Reload systemd to recognize the new service. Run;
+```
 sudo systemctl daemon-reload
+```
+
 •	Start the service now and enable startup at boot
+```
 sudo systemctl start churn_dashboard.service
 sudo systemctl enable churn_dashboard.service
+```
 
-Conclusion
+### Conclusion
 The AI-Powered Bank Customer Churn Prediction & Revenue Impact Analysis System successfully delivers an end-to-end, enterprise-grade solution that transforms customer behavior data into proactive business action. By integrating machine learning predictions with advanced financial analytics and real-time visualization, this system empowers banks to protect revenue, enhance customer lifetime value, and optimize retention spending.
 Through this project:
 i.	We developed a reliable classification model that accurately identifies customers at risk of churn
@@ -1213,16 +1322,16 @@ v.	We generated strategic retention recommendations tailored to financial exposu
 vi.	We deployed an interactive dashboard for operational decision-making and performance monitoring
 This solution moves the bank from reactive churn detection to proactive churn prevention, ensuring that customers are retained before they leave, and revenue is preserved rather than lost.
 
-Strategic Impact
+### Strategic Impact
 The system delivers:
-	Millions in potential revenue savings through targeted CLV retention
-	Higher ROI for marketing and retention programs
-	Improved customer satisfaction and loyalty
-	Faster leadership decisions backed by real insights
-	Future scalability to additional branches, products, and customers
+- Millions in potential revenue savings through targeted CLV retention
+- Higher ROI for marketing and retention programs
+- Improved customer satisfaction and loyalty
+- Faster leadership decisions backed by real insights
+- Future scalability to additional branches, products, and customers
 
 It serves as a foundation for continuous improvement, allowing the bank to:
-	Expand predictive analytics to loans, credit cards, and product cross-sell
-	Integrate real-time behavioral signals into churn scoring
-	Automate personalized customer outreach and campaign delivery
+- Expand predictive analytics to loans, credit cards, and product cross-sell
+- Integrate real-time behavioral signals into churn scoring
+- Automate personalized customer outreach and campaign delivery
 
