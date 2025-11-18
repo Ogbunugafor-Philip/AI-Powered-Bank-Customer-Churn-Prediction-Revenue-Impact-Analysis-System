@@ -1025,7 +1025,7 @@ python3 eval_05_shap_explainability.py
 
 
 
-Phase 4 — Revenue Impact Analysis
+### Phase 4 — Revenue Impact Analysis
 While predicting customer churn provides the early warning signal, true business value is realized when those predictions are translated into financial impact and actionable retention strategy. Phase 4 focuses on quantifying the monetary risk associated with customer churn and highlighting high-value customers who require urgent intervention.
 By combining churn probability scores with estimated Customer Lifetime Value (CLV), current balances, and salary inflow strength, we can accurately estimate the revenue at risk if a customer decides to leave. This enables bank leadership to prioritize retention activities where they will yield the highest return on investment.
 
