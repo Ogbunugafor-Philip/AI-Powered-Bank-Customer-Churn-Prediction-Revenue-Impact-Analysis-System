@@ -126,6 +126,8 @@ sqlite3 customer_analytics.db
 
 
 •	Create the customer_analytics.db table. Run;
+
+```
 CREATE TABLE bank_customers (
     customer_id TEXT PRIMARY KEY,
     age INTEGER,
@@ -153,39 +155,60 @@ CREATE TABLE bank_customers (
     risk_score REAL,
     estimated_clv REAL
 );
+```
 
 •	Inserting 10,000 Excel rows cannot be done directly inside SQLite because SQLite does not know how to read Excel (.xlsx) files, so we will use Python as the bridge. Exit the SQL;
+```
 .exit
+```
 
 •	Run the below in your local host to import the excel from your local host to your cloud server;
+```
 scp C:\Users\YourName\Desktop\bank_full_customer_db.xlsx root@YOUR_SERVER_IP:/root/projects/bank_churn/
- 
+``` 
+<img width="975" height="244" alt="image" src="https://github.com/user-attachments/assets/775e24f5-0a5b-4157-bafc-f4bd7371553a" />
 
 
 •	Install openpyxl in the terminal. This will allow Pandas to read .xlsx files properly. Run;
+```
 pip install openpyxl
- 
+``` 
 
 •	Install Pandas. Run;
+```
 pip install pandas
- 
+```
+ <img width="975" height="255" alt="image" src="https://github.com/user-attachments/assets/5a622567-68bf-4fc8-a1aa-b86fa41e3462" />
+
+
 •	Log onto you Python terminal; Run
+```
 python3
+```
 
 •	Then run these EXACT lines
+```
 import pandas as pd
 df = pd.read_excel("bank_full_customer_db.xlsx")
 df.head()
- 
+``` 
+<img width="975" height="204" alt="image" src="https://github.com/user-attachments/assets/3c3bf61c-fdc9-4245-bd23-769cf40d974a" />
 
-Step 3: Validate inserts with row counts
+
+#### Step 3: Validate inserts with row counts
+
 •	Run these 2 commands one by one to validate that our 10,000 customers have been exported to our db
+```
 sqlite3 customer_analytics.db
 SELECT COUNT(*) FROM bank_customers;
- 
+```
+<img width="975" height="150" alt="image" src="https://github.com/user-attachments/assets/788d5706-6740-4146-9c62-208b3d9fc1a8" />
 
-Step 4: Create a table for revenue analysis impact and insight and strategy
+
+#### Step 4: Create a table for revenue analysis impact and insight and strategy
+
 •	Still in your SQLite, paste the below
+```
 CREATE TABLE IF NOT EXISTS revenue_insights (
     customer_id TEXT PRIMARY KEY,
     churn_probability REAL,
@@ -195,9 +218,11 @@ CREATE TABLE IF NOT EXISTS revenue_insights (
     FOREIGN KEY (customer_id) REFERENCES bank_customers(customer_id)
 );
  
+```
+<img width="975" height="236" alt="image" src="https://github.com/user-attachments/assets/34544298-c5e2-426a-8e58-d586857f54f7" />
 
 
-Phase 2 — Model Development (Churn Risk Scoring)
+### Phase 2 — Model Development (Churn Risk Scoring)
 The bank currently has no system to proactively identify customers who are likely to churn. Customer exits are typically discovered after they stop transacting or close their accounts, by which time revenue has already been lost.
 Phase 2 introduces AI-driven churn risk prediction, enabling the bank to forecast which customers are most likely to disengage based on their behavior, financial activity, and overall engagement. This predictive intelligence allows the bank to move from a reactive customer management strategy to a proactive retention strategy.
 In this phase, we transform raw customer data into actionable machine learning outputs. We engineer a churn label using business rules that mimic real churn behaviors (e.g., long inactivity, falling engagement, low transactions). Then we train classification models such as Logistic Regression and Random Forest/XGBoost to estimate churn probability for every customer.
